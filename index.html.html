@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triangle Congruence Quest - Wordwall Style</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tone.js for Web Audio Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- Canvas Confetti for Celebration -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: radial-gradient(circle at center, #2e1065 0%, #0f172a 100%);
+            color: #fff;
+            min-height: 100vh;
+            user-select: none;
+            overflow-x: hidden;
+        }
+
+        /* Wordwall Glossy Card Styling */
+        .glossy-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+            border-radius: 1.5rem;
+        }
+
+        .glossy-btn {
+            background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+            border: 2px solid #60a5fa;
+            box-shadow: 0 6px 0 #1e40af, 0 10px 15px rgba(0,0,0,0.3);
+            transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glossy-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+            box-shadow: 0 8px 0 #1e40af, 0 12px 20px rgba(0,0,0,0.4);
+        }
+
+        .glossy-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #1e40af, 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .glossy-btn-orange {
+            background: linear-gradient(180deg, #f97316 0%, #c2410c 100%);
+            border-color: #fb923c;
+            box-shadow: 0 6px 0 #9a3412, 0 10px 15px rgba(0,0,0,0.3);
+        }
+
+        .glossy-btn-orange:hover {
+            box-shadow: 0 8px 0 #9a3412, 0 12px 20px rgba(0,0,0,0.4);
+        }
+
+        .glossy-btn-orange:active {
+            box-shadow: 0 2px 0 #9a3412, 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .glossy-btn-purple {
+            background: linear-gradient(180deg, #a855f7 0%, #7e22ce 100%);
+            border-color: #c084fc;
+            box-shadow: 0 6px 0 #6b21a8, 0 10px 15px rgba(0,0,0,0.3);
+        }
+
+        .glossy-btn-purple:hover {
+            box-shadow: 0 8px 0 #6b21a8, 0 12px 20px rgba(0,0,0,0.4);
+        }
+
+        .glossy-btn-purple:active {
+            box-shadow: 0 2px 0 #6b21a8, 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        /* Pulse & Animations */
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .animate-pulse-slow {
+            animation: pulse-slow 3s infinite ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-pop-in {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Matching Card States */
+        .match-card {
+            transition: all 0.25s ease;
+            cursor: pointer;
+        }
+
+        .match-card.selected {
+            border-color: #facc15 !important;
+            transform: scale(1.03);
+            box-shadow: 0 0 20px rgba(250, 204, 21, 0.6);
+        }
+
+        .match-card.matched {
+            opacity: 0.3;
+            pointer-events: none;
+            transform: scale(0.95);
+            filter: grayscale(0.8);
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(168, 85, 247, 0.5);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen justify-between p-2 md:p-6">
+
+    <!-- TOP BAR / HEADER NAVIGATION -->
+    <header class="w-full max-w-5xl mx-auto flex justify-between items-center bg-slate-900/80 p-4 rounded-2xl border border-purple-500/30 backdrop-blur-md mb-4 shadow-xl">
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('menu')">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-400 to-red-500 flex items-center justify-center font-black text-2xl shadow-lg transform rotate-3">
+                <i class="fa-solid me-0.5 fa-shapes text-white"></i>
+            </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-black bg-gradient-to-r from-amber-300 via-pink-400 to-purple-400 bg-clip-text text-transparent leading-none">
+                    TRI-CONGRUENCE
+                </h1>
+                <span class="text-xs text-purple-300 font-semibold tracking-widest uppercase">Wordwall Arcade</span>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <!-- Audio Mute Toggle -->
+            <button id="sound-btn" onclick="toggleSound()" class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 flex items-center justify-center text-amber-400 transition">
+                <i id="sound-icon" class="fas fa-volume-up text-lg"></i>
+            </button>
+            <!-- Back to Menu -->
+            <button onclick="switchView('menu')" class="hidden md:flex items-center space-x-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-sm font-bold text-slate-200 transition">
+                <i class="fas fa-home"></i>
+                <span>Menu</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="w-full max-w-5xl mx-auto flex-grow flex flex-col justify-center items-center relative">
+        
+        <!-- ---------------------------------------------------- -->
+        <!-- MENU VIEW: GAME MODE SELECTION                       -->
+        <!-- ---------------------------------------------------- -->
+        <div id="view-menu" class="w-full flex flex-col items-center text-center animate-pop-in py-6">
+            <div class="inline-block px-4 py-1.5 rounded-full bg-purple-900/60 border border-purple-400/40 text-purple-300 text-sm font-bold mb-3 tracking-wide uppercase shadow-inner">
+                ⚡ Interactive Geometry Challenge
+            </div>
+            <h2 class="text-3xl md:text-5xl font-black mb-3 text-white drop-shadow-md">
+                Master Triangle Congruence!
+            </h2>
+            <p class="text-slate-300 max-w-xl text-base md:text-lg mb-8">
+                Test your knowledge on SSS, SAS, ASA, AAS, and RHS rules across 3 exciting arcade game modes!
+            </p>
+
+            <!-- Game Mode Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl px-2">
+                
+                <!-- Mode 1: Game Show Quiz -->
+                <div onclick="startGame('gameshow')" class="glossy-card p-6 flex flex-col items-center justify-between hover:scale-105 transition-all duration-300 cursor-pointer group border-amber-500/30 hover:border-amber-400">
+                    <div class="w-20 h-20 rounded-2xl bg-gradient-to-tr from-amber-500 to-red-500 flex items-center justify-center text-4xl text-white mb-4 shadow-lg group-hover:rotate-6 transition">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="text-center mb-4">
+                        <span class="text-xs uppercase tracking-wider font-extrabold text-amber-400">Time Attack</span>
+                        <h3 class="text-2xl font-bold text-white mt-1">Game Show</h3>
+                        <p class="text-xs text-slate-300 mt-2">50:50 Lifelines, Streaks, Time Pressure & Multipliers!</p>
+                    </div>
+                    <button class="w-full py-3 rounded-xl glossy-btn glossy-btn-orange text-white font-black text-sm uppercase tracking-wider">
+                        Play Now
+                    </button>
+                </div>
+
+                <!-- Mode 2: Match Up -->
+                <div onclick="startGame('matchup')" class="glossy-card p-6 flex flex-col items-center justify-between hover:scale-105 transition-all duration-300 cursor-pointer group border-blue-500/30 hover:border-blue-400">
+                    <div class="w-20 h-20 rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-4xl text-white mb-4 shadow-lg group-hover:-rotate-6 transition">
+                        <i class="fas fa-puzzle-piece"></i>
+                    </div>
+                    <div class="text-center mb-4">
+                        <span class="text-xs uppercase tracking-wider font-extrabold text-blue-400">Drag & Match</span>
+                        <h3 class="text-2xl font-bold text-white mt-1">Match Up</h3>
+                        <p class="text-xs text-slate-300 mt-2">Pair geometry visual criteria diagrams with their exact rule!</p>
+                    </div>
+                    <button class="w-full py-3 rounded-xl glossy-btn text-white font-black text-sm uppercase tracking-wider">
+                        Play Now
+                    </button>
+                </div>
+
+                <!-- Mode 3: Practice Wheel / Quiz -->
+                <div onclick="startGame('practice')" class="glossy-card p-6 flex flex-col items-center justify-between hover:scale-105 transition-all duration-300 cursor-pointer group border-purple-500/30 hover:border-purple-400">
+                    <div class="w-20 h-20 rounded-2xl bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center text-4xl text-white mb-4 shadow-lg group-hover:rotate-6 transition">
+                        <i class="fas fa-[#fae]"></i>
+                        <i class="fas fa-shapes"></i>
+                    </div>
+                    <div class="text-center mb-4">
+                        <span class="text-xs uppercase tracking-wider font-extrabold text-purple-300">Untimed Practice</span>
+                        <h3 class="text-2xl font-bold text-white mt-1">Visual Quiz</h3>
+                        <p class="text-xs text-slate-300 mt-2">Relaxed step-by-step questions with rich diagram explanations.</p>
+                    </div>
+                    <button class="w-full py-3 rounded-xl glossy-btn glossy-btn-purple text-white font-black text-sm uppercase tracking-wider">
+                        Play Now
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ---------------------------------------------------- -->
+        <!-- GAMEPLAY CONTAINER (FOR QUIZ / GAMESHOW MODES)       -->
+        <!-- ---------------------------------------------------- -->
+        <div id="view-quiz" class="w-full max-w-4xl hidden animate-pop-in">
+            
+            <!-- HUD Stats Bar -->
+            <div class="w-full bg-slate-900/90 rounded-2xl p-4 border border-purple-500/40 mb-4 flex justify-between items-center shadow-lg">
+                <!-- Hearts / Lives -->
+                <div class="flex items-center space-x-1.5" id="hud-lives">
+                    <i class="fas fa-heart text-red-500 text-xl md:text-2xl animate-pulse"></i>
+                    <i class="fas fa-heart text-red-500 text-xl md:text-2xl animate-pulse"></i>
+                    <i class="fas fa-heart text-red-500 text-xl md:text-2xl animate-pulse"></i>
+                </div>
+
+                <!-- Timer Bar & Text -->
+                <div id="timer-container" class="flex-1 max-w-xs mx-4 flex flex-col items-center">
+                    <div class="flex justify-between w-full text-xs text-amber-300 font-bold mb-1">
+                        <span><i class="fas fa-stopwatch mr-1"></i> TIME</span>
+                        <span id="timer-text">30s</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-3 border border-slate-700 overflow-hidden">
+                        <div id="timer-bar" class="bg-gradient-to-r from-amber-400 to-red-500 h-full w-full transition-all duration-1000"></div>
+                    </div>
+                </div>
+
+                <!-- Score & Streak -->
+                <div class="flex flex-col items-end">
+                    <span class="text-xs text-purple-300 font-bold uppercase tracking-wider">Score</span>
+                    <span id="hud-score" class="text-2xl md:text-3xl font-black text-amber-400 drop-shadow">0</span>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="glossy-card p-4 md:p-6 flex flex-col items-center relative overflow-hidden">
+                
+                <!-- Powerups Bar (Only in Game Show) -->
+                <div id="powerups-bar" class="w-full flex justify-between items-center mb-4 pb-2 border-b border-white/10">
+                    <span id="question-number-badge" class="px-3 py-1 bg-purple-900/80 border border-purple-400/30 text-purple-200 text-xs font-bold rounded-full">
+                        Question 1 of 8
+                    </span>
+
+                    <div class="flex space-x-2">
+                        <button id="btn-5050" onclick="use5050()" class="px-3 py-1 bg-amber-500/20 border border-amber-400/50 hover:bg-amber-500/40 text-amber-300 text-xs font-extrabold rounded-lg flex items-center space-x-1 transition">
+                            <i class="fas fa-star text-amber-400"></i>
+                            <span>50:50</span>
+                        </button>
+                        <button id="btn-freeze" onclick="useFreeze()" class="px-3 py-1 bg-cyan-500/20 border border-cyan-400/50 hover:bg-cyan-500/40 text-cyan-300 text-xs font-extrabold rounded-lg flex items-center space-x-1 transition">
+                            <i class="fas fa-snowflake text-cyan-400"></i>
+                            <span>+10s</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Question Text -->
+                <h3 id="question-text" class="text-lg md:text-2xl font-bold text-center text-white mb-4">
+                    Loading question...
+                </h3>
+
+                <!-- SVG Geometric Diagram Display -->
+                <div class="w-full max-w-md h-48 md:h-56 bg-slate-900/70 rounded-xl border border-white/10 p-2 mb-6 flex items-center justify-center relative shadow-inner" id="svg-diagram-box">
+                    <!-- SVG diagram rendered dynamically -->
+                </div>
+
+                <!-- Answer Choices Grid -->
+                <div id="options-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 w-full">
+                    <!-- Dynamic Answer Buttons -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ---------------------------------------------------- -->
+        <!-- GAMEPLAY CONTAINER (FOR MATCH UP MODE)               -->
+        <!-- ---------------------------------------------------- -->
+        <div id="view-matchup" class="w-full max-w-5xl hidden animate-pop-in">
+            <div class="glossy-card p-4 md:p-6 flex flex-col items-center">
+                <div class="w-full flex justify-between items-center mb-4 pb-2 border-b border-white/10">
+                    <div>
+                        <h3 class="text-xl font-bold text-white">Match Up Challenge</h3>
+                        <p class="text-xs text-slate-300">Click a Criterion Card on left, then click its corresponding Diagram on right!</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs text-purple-300 font-bold block">Pairs Matched</span>
+                        <span id="match-score" class="text-2xl font-black text-amber-400">0 / 5</span>
+                    </div>
+                </div>
+
+                <!-- Two Column Matching Deck -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                    <!-- Left: Criteria Cards -->
+                    <div id="criteria-column" class="flex flex-col space-y-3">
+                        <h4 class="text-sm font-bold text-purple-300 uppercase tracking-wider mb-1">Criteria Rules</h4>
+                        <!-- Injected JS -->
+                    </div>
+
+                    <!-- Right: Diagram Cards -->
+                    <div id="diagram-column" class="flex flex-col space-y-3">
+                        <h4 class="text-sm font-bold text-cyan-300 uppercase tracking-wider mb-1">Matching Diagrams</h4>
+                        <!-- Injected JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ---------------------------------------------------- -->
+        <!-- GAME OVER / RECAP SCREEN                             -->
+        <!-- ---------------------------------------------------- -->
+        <div id="view-results" class="w-full max-w-lg glossy-card p-8 text-center hidden animate-pop-in">
+            <div id="result-icon-box" class="w-24 h-24 rounded-full bg-amber-500/20 border-4 border-amber-400 mx-auto flex items-center justify-center text-5xl text-amber-400 mb-4 animate-bounce">
+                <i class="fas fa-trophy"></i>
+            </div>
+            
+            <h2 id="result-title" class="text-3xl font-black text-white mb-2">VICTORY!</h2>
+            <p id="result-subtitle" class="text-slate-300 text-sm mb-6">Awesome work! You mastered the triangle criteria!</p>
+
+            <!-- Stats Recap Box -->
+            <div class="bg-slate-900/80 rounded-xl p-4 border border-white/10 mb-6 grid grid-cols-2 gap-4">
+                <div class="flex flex-col items-center">
+                    <span class="text-xs text-slate-400 font-bold uppercase">Final Score</span>
+                    <span id="res-score" class="text-3xl font-black text-amber-400">1250</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <span class="text-xs text-slate-400 font-bold uppercase">Accuracy</span>
+                    <span id="res-accuracy" class="text-3xl font-black text-green-400">100%</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 w-full">
+                <button onclick="restartCurrentGame()" class="flex-1 py-3.5 rounded-xl glossy-btn glossy-btn-orange text-white font-black text-sm uppercase tracking-wider flex items-center justify-center space-x-2">
+                    <i class="fas fa-redo"></i>
+                    <span>Play Again</span>
+                </button>
+                <button onclick="switchView('menu')" class="flex-1 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-black text-sm uppercase tracking-wider flex items-center justify-center space-x-2">
+                    <i class="fas fa-list"></i>
+                    <span>Main Menu</span>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="w-full max-w-5xl mx-auto text-center py-4 text-xs text-slate-400">
+        Triangle Congruence Rules: SSS (Side-Side-Side), SAS (Side-Angle-Side), ASA (Angle-Side-Angle), AAS (Angle-Angle-Side), RHS (Right-Hypotenuse-Side)
+    </footer>
+
+    <!-- JAVASCRIPT GAME LOGIC -->
+    <script>
+        /* ---------------------------------------------------- */
+        /* AUDIO SYNTHESIS (Tone.js)                            */
+        /* ---------------------------------------------------- */
+        let soundEnabled = true;
+        let synth, polySynth;
+
+        function initAudio() {
+            if (!synth) {
+                synth = new Tone.Synth().toDestination();
+                polySynth = new Tone.PolySynth().toDestination();
+            }
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                const now = Tone.now();
+                if (type === 'correct') {
+                    polySynth.triggerAttackRelease(["C5", "E5", "G5", "C6"], "8n", now);
+                } else if (type === 'wrong') {
+                    synth.triggerAttackRelease("F3", "8n", now);
+                    synth.triggerAttackRelease("C3", "8n", now + 0.15);
+                } else if (type === 'click') {
+                    synth.triggerAttackRelease("G4", "16n", now);
+                } else if (type === 'win') {
+                    polySynth.triggerAttackRelease(["C4", "E4", "G4", "C5"], "4n", now);
+                    polySynth.triggerAttackRelease(["G4", "B4", "D5", "G5"], "4n", now + 0.25);
+                    polySynth.triggerAttackRelease(["C5", "E5", "G5", "C6"], "2n", now + 0.5);
+                }
+            } catch (e) {
+                console.log("Audio play blocked or error", e);
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (soundEnabled) {
+                icon.className = 'fas fa-volume-up text-lg text-amber-400';
+            } else {
+                icon.className = 'fas fa-volume-mute text-lg text-slate-500';
+            }
+        }
+
+        /* ---------------------------------------------------- */
+        /* QUESTION DATASET WITH SVG BUILDERS                   */
+        /* ---------------------------------------------------- */
+        const QUESTION_DATABASE = [
+            {
+                id: 1,
+                rule: "SSS",
+                title: "All 3 pairs of corresponding sides are equal.",
+                question: "Which triangle congruence criterion is shown in the diagram?",
+                options: ["SSS", "SAS", "ASA", "RHS"],
+                answer: 0,
+                explanation: "Three tick marks on all corresponding sides indicate Side-Side-Side (SSS).",
+                svgType: "SSS"
+            },
+            {
+                id: 2,
+                rule: "SAS",
+                title: "2 sides and the included angle are equal.",
+                question: "Which criterion applies when two sides and the angle BETWEEN them are equal?",
+                options: ["ASA", "SAS", "AAS", "SSS"],
+                answer: 1,
+                explanation: "The angle is situated right between the two marked sides (SAS).",
+                svgType: "SAS"
+            },
+            {
+                id: 3,
+                rule: "ASA",
+                title: "2 angles and the included side are equal.",
+                question: "Identify the criterion where the side is INCLUDED between two angles:",
+                options: ["AAS", "SAS", "ASA", "RHS"],
+                answer: 2,
+                explanation: "Two marked angles enclose the side marked with equal length (ASA).",
+                svgType: "ASA"
+            },
+            {
+                id: 4,
+                rule: "AAS",
+                title: "2 angles and a non-included side are equal.",
+                question: "Two angles and a NON-included side are equal. What is the rule?",
+                options: ["ASA", "AAS", "SAS", "SSS"],
+                answer: 1,
+                explanation: "The marked side is not between the two angles, making it Angle-Angle-Side (AAS).",
+                svgType: "AAS"
+            },
+            {
+                id: 5,
+                rule: "RHS",
+                title: "Right angle, Hypotenuse, and one Side are equal.",
+                question: "Both triangles have a Right angle, equal Hypotenuse, and one equal Side:",
+                options: ["SAS", "ASS", "RHS", "ASA"],
+                answer: 2,
+                explanation: "Right angle + Hypotenuse + Side = RHS (or HL) criterion.",
+                svgType: "RHS"
+            },
+            {
+                id: 6,
+                rule: "SAS",
+                title: "Included angle scenario.",
+                question: "In △ABC and △DEF, AB = DE, AC = DF, and ∠A = ∠D. Which rule proves congruence?",
+                options: ["SSS", "SAS", "ASA", "RHS"],
+                answer: 1,
+                explanation: "∠A is between AB and AC, so SAS applies.",
+                svgType: "SAS"
+            },
+            {
+                id: 7,
+                rule: "RHS",
+                title: "Hypotenuse & Leg equal.",
+                question: "In two right-angled triangles, the hypotenuses and one leg are equal. Name the rule:",
+                options: ["RHS", "SSS", "ASA", "AAS"],
+                answer: 0,
+                explanation: "Right angle, Hypotenuse, and Side (Leg) is RHS.",
+                svgType: "RHS"
+            },
+            {
+                id: 8,
+                rule: "SSS",
+                title: "Three equal sides.",
+                question: "If AB = PQ, BC = QR, and AC = PR, which condition establishes △ABC ≅ △PQR?",
+                options: ["SSS", "SAS", "ASA", "AAA"],
+                answer: 0,
+                explanation: "All three corresponding sides are congruent (SSS).",
+                svgType: "SSS"
+            }
+        ];
+
+        /* ---------------------------------------------------- */
+        /* SVG DIAGRAM GENERATOR                                */
+        /* ---------------------------------------------------- */
+        function generateTriangleSVG(type) {
+            // Generates visual SVG with marked ticks & arcs for 2 congruent triangles side-by-side
+            let content = '';
+
+            // Colors
+            const lineCol = "#e2e8f0";
+            const markCol = "#f59e0b";
+            const angleCol = "#ec4899";
+
+            if (type === 'SSS') {
+                content = `
+                    <!-- Triangle 1 -->
+                    <polygon points="30,140 110,40 170,140" fill="none" stroke="${lineCol}" stroke-width="3"/>
+                    <!-- Ticks T1 -->
+                    <line x1="63" y1="87" x2="77" y2="93" stroke="${markCol}" stroke-width="3"/>
+                    <line x1="133" y1="87" x2="147" y2="93" stroke="${markCol}" stroke-width="3"/>
+                    <line x1="137" y1="83" x2="151" y2="89" stroke="${markCol}" stroke-width="3"/>
+                    <line x1="95" y1="133" x2="95" y2="147" stroke="${markCol}" stroke-width="3"/>
+                    <line x1="105" y1="133" x2="105" y2="147" stroke="${markCol}" stroke-width="3"/>
+                    <line x1="115" y1="133" x2="115" y2="147" stroke="${markCol}" stroke-width="3"/>
+
+                    <!-- Triangle 2 -->
+                    <polygon points="210,140 290,40 350,140" fill="none" stroke="${lineCol}" stroke-width="3"/>
+                    <!-- Ticks T2 -->
+                    <line x1="243" y1="87" x2="257" y2="93" stroke="${markCol}" stroke-width="3"/>
+                    <line x1="313" y1="87" x2="327" y2="93" stroke="${markCol}" stroke-width="3"/>
+                    <line x1="317" y1="83" x2="331" y2="89" stroke="${markCol}" stroke-width="3"/>
+                    <line x1="275" y1="133" x2="275" y2="147" stroke="${markCol}" stroke-width="3"/>
+                    <line x1="285" y1="133" x2="285" y2="147" stroke="${markCol}" stroke-width="3"/>
+                    <line x1="295" y1="133" x2="295" y2="147" stroke="${markCol}" stroke-width="3"/>
+                `;
+            } else if (type === 'SAS') {
+                content = `
+                    <!-- Triangle 1 -->
+                    <polygon points="30,140 100,40 170,140" fill="none" stroke="${lineCol}" stroke-width="3"/>
+                    <line x1="58" y1="87" x2="72" y2="93" stroke="${markCol}" stroke-width="3"/>
+                    <line x1="95" y1="133" x2="95" y2="147" stroke="${markCol}" stroke-width="3"/>
+                    <!-- Angle Arc -->
+                    <path d="M 45 140 A 20 20 0 0 1 40 125" fill="none" stroke="${angleCol}" stroke-width="3"/>
+
+                    <!-- Triangle 2 -->
+                    <polygon points="210,140 280,40 350,140" fill="none" stroke="${lineCol}" stroke-width="3"/>
+                    <line x1="238" y1="87" x2="252" y2="93" stroke="${markCol}" stroke-width="3"/>
+                    <line x1="275" y1="133" x2="275" y2="147" stroke="${markCol}" stroke-width="3"/>
+                    <!-- Angle Arc -->
+                    <path d="M 225 140 A 20 20 0 0 1 220 125" fill="none" stroke="${angleCol}" stroke-width="3"/>
+                `;
+            } else if (type === 'ASA') {
+                content = `
+                    <!-- Triangle 1 -->
+                    <polygon points="30,140 100,40 170,140" fill="none" stroke="${lineCol}" stroke-width="3"/>
+                    <line x1="95" y1="133" x2="95" y2="147" stroke="${markCol}" stroke-width="3"/>
+                    <path d="M 45 140 A 20 20 0 0 1 40 125" fill="none" stroke="${angleCol}" stroke-width="3"/>
+                    <path d="M 155 140 A 20 20 0 0 0 160 125" fill="none" stroke="${angleCol}" stroke-width="3"/>
+
+                    <!-- Triangle 2 -->
+                    <polygon points="210,140 280,40 350,140" fill="none" stroke="${lineCol}" stroke-width="3"/>
+                    <line x1="275" y1="133" x2="275" y2="147" stroke="${markCol}" stroke-width="3"/>
+                    <path d="M 225 140 A 20 20 0 0 1 220 125" fill="none" stroke="${angleCol}" stroke-width="3"/>
+                    <path d="M 335 140 A 20 20 0 0 0 340 125" fill="none" stroke="${angleCol}" stroke-width="3"/>
+                `;
+            } else if (type === 'AAS') {
+                content = `
+                    <!-- Triangle 1 -->
+                    <polygon points="30,140 100,40 170,140" fill="none" stroke="${lineCol}" stroke-width="3"/>
+                    <line x1="130" y1="87" x2="144" y2="93" stroke="${markCol}" stroke-width="3"/>
+                    <path d="M 45 140 A 20 20 0 0 1 40 125" fill="none" stroke="${angleCol}" stroke-width="3"/>
+                    <path d="M 90 54 A 15 15 0 0 1 110 54" fill="none" stroke="${angleCol}" stroke-width="3"/>
+
+                    <!-- Triangle 2 -->
+                    <polygon points="210,140 280,40 350,140" fill="none" stroke="${lineCol}" stroke-width="3"/>
+                    <line x1="310" y1="87" x2="324" y2="93" stroke="${markCol}" stroke-width="3"/>
+                    <path d="M 225 140 A 20 20 0 0 1 220 125" fill="none" stroke="${angleCol}" stroke-width="3"/>
+                    <path d="M 270 54 A 15 15 0 0 1 290 54" fill="none" stroke="${angleCol}" stroke-width="3"/>
+                `;
+            } else if (type === 'RHS') {
+                content = `
+                    <!-- Triangle 1 (Right) -->
+                    <polygon points="40,140 40,40 150,140" fill="none" stroke="${lineCol}" stroke-width="3"/>
+                    <rect x="40" y="125" width="15" height="15" fill="none" stroke="${angleCol}" stroke-width="2"/>
+                    <line x1="88" y1="83" x2="98" y2="97" stroke="${markCol}" stroke-width="3"/>
+                    <line x1="33" y1="85" x2="47" y2="85" stroke="${markCol}" stroke-width="3"/>
+
+                    <!-- Triangle 2 (Right) -->
+                    <polygon points="220,140 220,40 330,140" fill="none" stroke="${lineCol}" stroke-width="3"/>
+                    <rect x="220" y="125" width="15" height="15" fill="none" stroke="${angleCol}" stroke-width="2"/>
+                    <line x1="268" y1="83" x2="278" y2="97" stroke="${markCol}" stroke-width="3"/>
+                    <line x1="213" y1="85" x2="227" y2="85" stroke="${markCol}" stroke-width="3"/>
+                `;
+            }
+
+            return `
+                <svg viewBox="0 0 380 170" class="w-full h-full drop-shadow-md">
+                    ${content}
+                </svg>
+            `;
+        }
+
+        /* ---------------------------------------------------- */
+        /* STATE MANAGEMENT                                     */
+        /* ---------------------------------------------------- */
+        let currentGameMode = 'gameshow'; // 'gameshow', 'matchup', 'practice'
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let lives = 3;
+        let timerInterval = null;
+        let timeLeft = 30;
+        let streak = 0;
+        let correctAnswersCount = 0;
+        let activeQuestions = [];
+
+        // Match Up Mode State
+        let selectedCriterionCard = null;
+        let selectedDiagramCard = null;
+        let matchedPairsCount = 0;
+
+        /* ---------------------------------------------------- */
+        /* NAVIGATION & VIEW SWITCHING                          */
+        /* ---------------------------------------------------- */
+        function switchView(viewName) {
+            playSound('click');
+            clearInterval(timerInterval);
+
+            document.getElementById('view-menu').classList.add('hidden');
+            document.getElementById('view-quiz').classList.add('hidden');
+            document.getElementById('view-matchup').classList.add('hidden');
+            document.getElementById('view-results').classList.add('hidden');
+
+            if (viewName === 'menu') {
+                document.getElementById('view-menu').classList.remove('hidden');
+            } else if (viewName === 'quiz') {
+                document.getElementById('view-quiz').classList.remove('hidden');
+            } else if (viewName === 'matchup') {
+                document.getElementById('view-matchup').classList.remove('hidden');
+            } else if (viewName === 'results') {
+                document.getElementById('view-results').classList.remove('hidden');
+            }
+        }
+
+        /* ---------------------------------------------------- */
+        /* GAME INITIALIZATION                                  */
+        /* ---------------------------------------------------- */
+        function startGame(mode) {
+            currentGameMode = mode;
+            score = 0;
+            lives = 3;
+            streak = 0;
+            correctAnswersCount = 0;
+            currentQuestionIndex = 0;
+            activeQuestions = [...QUESTION_DATABASE].sort(() => Math.random() - 0.5);
+
+            if (mode === 'gameshow' || mode === 'practice') {
+                switchView('quiz');
+                setupHUD();
+                loadQuestion();
+            } else if (mode === 'matchup') {
+                switchView('matchup');
+                setupMatchUpGame();
+            }
+        }
+
+        function restartCurrentGame() {
+            startGame(currentGameMode);
+        }
+
+        /* ---------------------------------------------------- */
+        /* QUIZ / GAME SHOW LOGIC                               */
+        /* ---------------------------------------------------- */
+        function setupHUD() {
+            document.getElementById('hud-score').textContent = score;
+
+            // Setup Lives Display
+            const livesContainer = document.getElementById('hud-lives');
+            if (currentGameMode === 'practice') {
+                livesContainer.style.display = 'none';
+                document.getElementById('powerups-bar').style.display = 'none';
+                document.getElementById('timer-container').style.visibility = 'hidden';
+            } else {
+                livesContainer.style.display = 'flex';
+                document.getElementById('powerups-bar').style.display = 'flex';
+                document.getElementById('timer-container').style.visibility = 'visible';
+                updateLivesHUD();
+            }
+        }
+
+        function updateLivesHUD() {
+            const livesContainer = document.getElementById('hud-lives');
+            livesContainer.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const heart = document.createElement('i');
+                if (i < lives) {
+                    heart.className = 'fas fa-heart text-red-500 text-xl md:text-2xl animate-pulse';
+                } else {
+                    heart.className = 'fas fa-heart text-slate-700 text-xl md:text-2xl';
+                }
+                livesContainer.appendChild(heart);
+            }
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            if (currentGameMode === 'practice') return;
+
+            timeLeft = 25;
+            const timerBar = document.getElementById('timer-bar');
+            const timerText = document.getElementById('timer-text');
+            
+            timerText.textContent = `${timeLeft}s`;
+            timerBar.style.width = '100%';
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerText.textContent = `${timeLeft}s`;
+                timerBar.style.width = `${(timeLeft / 25) * 100}%`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleTimeOut();
+                }
+            }, 1000);
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= activeQuestions.length || (lives <= 0 && currentGameMode !== 'practice')) {
+                endGame();
+                return;
+            }
+
+            const q = activeQuestions[currentQuestionIndex];
+            
+            // Badge text
+            document.getElementById('question-number-badge').textContent = `Question ${currentQuestionIndex + 1} of ${activeQuestions.length}`;
+            
+            // Question Text
+            document.getElementById('question-text').textContent = q.question;
+
+            // Render SVG Diagram
+            document.getElementById('svg-diagram-box').innerHTML = generateTriangleSVG(q.svgType);
+
+            // Render Options
+            const optionsGrid = document.getElementById('options-grid');
+            optionsGrid.innerHTML = '';
+
+            // Reset 5050 state if any
+            document.getElementById('btn-5050').disabled = false;
+            document.getElementById('btn-5050').classList.remove('opacity-40');
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `glossy-btn w-full p-4 rounded-xl font-bold text-base md:text-lg text-white flex items-center justify-between transition group transform`;
+                btn.innerHTML = `
+                    <span class="flex items-center space-x-3">
+                        <span class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-sm font-black">${String.fromCharCode(65 + idx)}</span>
+                        <span>${opt}</span>
+                    </span>
+                    <i class="fas fa-chevron-right text-sm opacity-0 group-hover:opacity-100 transition"></i>
+                `;
+                btn.onclick = () => checkAnswer(idx, btn);
+                optionsGrid.appendChild(btn);
+            });
+
+            startTimer();
+        }
+
+        function checkAnswer(selectedIndex, btnElement) {
+            clearInterval(timerInterval);
+            playSound('click');
+
+            const q = activeQuestions[currentQuestionIndex];
+            const allBtns = document.getElementById('options-grid').children;
+
+            // Disable all buttons
+            for (let b of allBtns) {
+                b.disabled = true;
+                b.onclick = null;
+            }
+
+            if (selectedIndex === q.answer) {
+                // CORRECT
+                playSound('correct');
+                btnElement.classList.remove('glossy-btn');
+                btnElement.classList.add('bg-green-600', 'border-2', 'border-green-400', 'shadow-green-500/50');
+                
+                streak++;
+                correctAnswersCount++;
+                const speedBonus = currentGameMode === 'gameshow' ? timeLeft * 10 : 0;
+                const pointsGained = 100 + (streak * 20) + speedBonus;
+                score += pointsGained;
+                document.getElementById('hud-score').textContent = score;
+
+            } else {
+                // INCORRECT
+                playSound('wrong');
+                btnElement.classList.remove('glossy-btn');
+                btnElement.classList.add('bg-red-600', 'border-2', 'border-red-400', 'animate-shake');
+                
+                // Highlight correct one
+                allBtns[q.answer].classList.remove('glossy-btn');
+                allBtns[q.answer].classList.add('bg-green-600', 'border-2', 'border-green-400');
+
+                streak = 0;
+                if (currentGameMode === 'gameshow') {
+                    lives--;
+                    updateLivesHUD();
+                }
+            }
+
+            // Next question delay
+            setTimeout(() => {
+                currentQuestionIndex++;
+                loadQuestion();
+            }, 1500);
+        }
+
+        function handleTimeOut() {
+            playSound('wrong');
+            streak = 0;
+            if (currentGameMode === 'gameshow') {
+                lives--;
+                updateLivesHUD();
+            }
+
+            const q = activeQuestions[currentQuestionIndex];
+            const allBtns = document.getElementById('options-grid').children;
+            if (allBtns[q.answer]) {
+                allBtns[q.answer].classList.remove('glossy-btn');
+                allBtns[q.answer].classList.add('bg-green-600', 'border-2', 'border-green-400');
+            }
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                loadQuestion();
+            }, 1500);
+        }
+
+        /* Powerups */
+        function use5050() {
+            playSound('click');
+            const q = activeQuestions[currentQuestionIndex];
+            const allBtns = Array.from(document.getElementById('options-grid').children);
+            
+            let removed = 0;
+            allBtns.forEach((btn, idx) => {
+                if (idx !== q.answer && removed < 2) {
+                    btn.style.visibility = 'hidden';
+                    removed++;
+                }
+            });
+
+            const btn5050 = document.getElementById('btn-5050');
+            btn5050.disabled = true;
+            btn5050.classList.add('opacity-40');
+        }
+
+        function useFreeze() {
+            playSound('click');
+            timeLeft += 10;
+            document.getElementById('timer-text').textContent = `${timeLeft}s`;
+            const btnFreeze = document.getElementById('btn-freeze');
+            btnFreeze.disabled = true;
+            btnFreeze.classList.add('opacity-40');
+        }
+
+        /* ---------------------------------------------------- */
+        /* MATCH UP MODE LOGIC                                  */
+        /* ---------------------------------------------------- */
+        function setupMatchUpGame() {
+            selectedCriterionCard = null;
+            selectedDiagramCard = null;
+            matchedPairsCount = 0;
+            document.getElementById('match-score').textContent = `0 / 5`;
+
+            const criteriaList = [
+                { id: 'SSS', title: 'SSS (Side-Side-Side)', desc: '3 pairs of equal sides' },
+                { id: 'SAS', title: 'SAS (Side-Angle-Side)', desc: '2 sides & included angle' },
+                { id: 'ASA', title: 'ASA (Angle-Side-Angle)', desc: '2 angles & included side' },
+                { id: 'AAS', title: 'AAS (Angle-Angle-Side)', desc: '2 angles & non-included side' },
+                { id: 'RHS', title: 'RHS (Right-Hypotenuse-Side)', desc: 'Right angle, hypotenuse, side' }
+            ].sort(() => Math.random() - 0.5);
+
+            const diagramList = [
+                { id: 'SSS', type: 'SSS' },
+                { id: 'SAS', type: 'SAS' },
+                { id: 'ASA', type: 'ASA' },
+                { id: 'AAS', type: 'AAS' },
+                { id: 'RHS', type: 'RHS' }
+            ].sort(() => Math.random() - 0.5);
+
+            const criteriaCol = document.getElementById('criteria-column');
+            const diagramCol = document.getElementById('diagram-column');
+
+            criteriaCol.innerHTML = '<h4 class="text-sm font-bold text-purple-300 uppercase tracking-wider mb-1">Criteria Rules</h4>';
+            diagramCol.innerHTML = '<h4 class="text-sm font-bold text-cyan-300 uppercase tracking-wider mb-1">Matching Diagrams</h4>';
+
+            criteriaList.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'match-card bg-slate-800/90 border-2 border-purple-500/30 hover:border-purple-400 p-3 rounded-xl text-left shadow';
+                card.dataset.id = item.id;
+                card.innerHTML = `
+                    <div class="font-bold text-white text-sm md:text-base">${item.title}</div>
+                    <div class="text-xs text-slate-300">${item.desc}</div>
+                `;
+                card.onclick = () => selectMatchCard('criterion', card);
+                criteriaCol.appendChild(card);
+            });
+
+            diagramList.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'match-card bg-slate-800/90 border-2 border-cyan-500/30 hover:border-cyan-400 p-2 rounded-xl flex items-center justify-center shadow h-24';
+                card.dataset.id = item.id;
+                card.innerHTML = generateTriangleSVG(item.type);
+                card.onclick = () => selectMatchCard('diagram', card);
+                diagramCol.appendChild(card);
+            });
+        }
+
+        function selectMatchCard(type, cardElement) {
+            playSound('click');
+
+            if (type === 'criterion') {
+                if (selectedCriterionCard) selectedCriterionCard.classList.remove('selected');
+                selectedCriterionCard = cardElement;
+                selectedCriterionCard.classList.add('selected');
+            } else if (type === 'diagram') {
+                if (selectedDiagramCard) selectedDiagramCard.classList.remove('selected');
+                selectedDiagramCard = cardElement;
+                selectedDiagramCard.classList.add('selected');
+            }
+
+            // Check if both selected
+            if (selectedCriterionCard && selectedDiagramCard) {
+                const id1 = selectedCriterionCard.dataset.id;
+                const id2 = selectedDiagramCard.dataset.id;
+
+                if (id1 === id2) {
+                    // MATCH!
+                    playSound('correct');
+                    selectedCriterionCard.classList.remove('selected');
+                    selectedDiagramCard.classList.remove('selected');
+                    selectedCriterionCard.classList.add('matched');
+                    selectedDiagramCard.classList.add('matched');
+
+                    selectedCriterionCard = null;
+                    selectedDiagramCard = null;
+
+                    matchedPairsCount++;
+                    score += 200;
+                    document.getElementById('match-score').textContent = `${matchedPairsCount} / 5`;
+
+                    if (matchedPairsCount === 5) {
+                        setTimeout(() => {
+                            endGame();
+                        }, 800);
+                    }
+                } else {
+                    // WRONG MATCH
+                    playSound('wrong');
+                    selectedCriterionCard.classList.add('animate-shake');
+                    selectedDiagramCard.classList.add('animate-shake');
+
+                    setTimeout(() => {
+                        if (selectedCriterionCard) {
+                            selectedCriterionCard.classList.remove('selected', 'animate-shake');
+                        }
+                        if (selectedDiagramCard) {
+                            selectedDiagramCard.classList.remove('selected', 'animate-shake');
+                        }
+                        selectedCriterionCard = null;
+                        selectedDiagramCard = null;
+                    }, 500);
+                }
+            }
+        }
+
+        /* ---------------------------------------------------- */
+        /* END GAME & RESULTS                                   */
+        /* ---------------------------------------------------- */
+        function endGame() {
+            clearInterval(timerInterval);
+            switchView('results');
+
+            const isWin = lives > 0 || currentGameMode === 'matchup' || currentGameMode === 'practice';
+            const resultTitle = document.getElementById('result-title');
+            const resultSubtitle = document.getElementById('result-subtitle');
+            const resultIconBox = document.getElementById('result-icon-box');
+
+            if (isWin) {
+                playSound('win');
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+                resultTitle.textContent = "CONGRATULATIONS!";
+                resultSubtitle.textContent = "You successfully mastered the triangle criteria rules!";
+                resultIconBox.innerHTML = '<i class="fas fa-trophy"></i>';
+                resultIconBox.className = "w-24 h-24 rounded-full bg-amber-500/20 border-4 border-amber-400 mx-auto flex items-center justify-center text-5xl text-amber-400 mb-4 animate-bounce";
+            } else {
+                playSound('wrong');
+                resultTitle.textContent = "GAME OVER";
+                resultSubtitle.textContent = "Keep practicing! Review SSS, SAS, ASA, AAS, and RHS rules.";
+                resultIconBox.innerHTML = '<i class="fas fa-heart-broken text-red-500"></i>';
+                resultIconBox.className = "w-24 h-24 rounded-full bg-red-500/20 border-4 border-red-400 mx-auto flex items-center justify-center text-5xl mb-4";
+            }
+
+            document.getElementById('res-score').textContent = score;
+
+            let totalItems = currentGameMode === 'matchup' ? 5 : activeQuestions.length;
+            let accuracy = Math.round((correctAnswersCount / totalItems) * 100) || (isWin ? 100 : 0);
+            document.getElementById('res-accuracy').textContent = `${accuracy}%`;
+        }
+    </script>
+</body>
+</html>
